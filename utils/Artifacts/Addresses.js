@@ -1,0 +1,4 @@
+export const factoryAddresses = {
+    14: "0x08AbeE4e26ec2dE40754433791a304F4BD9F3258",
+    6: "0x6F9F73f0e8d52798026B34eD6b86C81a1531aBCF"
+}

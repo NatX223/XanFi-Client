@@ -1,0 +1,178 @@
+@import url("https://fonts.googleapis.com/css2?family=Exo:wght@300;400;500;600;700;800&display=swap");
+
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root,
+[data-theme] {
+  background: hsl(var(--b2));
+}
+
+body {
+  min-height: 100vh;
+  line-height: 1.5rem;
+  font-family: "Exo", sans-serif;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+p {
+  margin: 1rem 0;
+}
+
+.btn {
+  @apply shadow-md;
+}
+
+.btn.btn-ghost {
+  @apply shadow-none;
+}
+
+.text-gradient {
+  background: linear-gradient(261.51deg, #ff00b8 19.74%, #26ffe5 92.62%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.bg-gradient {
+  background: linear-gradient(261.51deg, #ff00b8 19.74%, #26ffe5 92.62%);
+}
+
+.bg-gradient2 {
+  background: linear-gradient(261.51deg, #2663ff 20%, #ff00b8 92.62%); 
+}
+
+.bg-lightgradient {
+  background: #000116;
+  box-shadow: 0px 4px 9px 5px #00033d;
+}
+
+.bg-gradient-1 {
+  background: linear-gradient(196.57deg, #171717 11.47%, #ff00b8 233.89%);
+  box-shadow: -5.71913px 12.5821px 4.57531px rgba(0, 0, 0, 0.25);
+}
+
+.bg-gradient-2 {
+  background: linear-gradient(130.44deg, rgba(23, 23, 23, 0.5) 26.99%, rgba(38, 255, 73, 0.5) 138.81%);
+  backdrop-filter: blur(7.5px);
+}
+
+.bg-gradient-2-0 {
+  background: linear-gradient(130.44deg, rgba(23, 23, 23, 0.5) 26.99%, rgba(114, 38, 255, 0.5) 138.81%);
+  backdrop-filter: blur(7.5px);
+}
+
+.bg-gradient-3 {
+  background: linear-gradient(149.4deg, rgba(23, 23, 23, 0.5) 18.58%, rgba(38, 255, 229, 0.5) 129.49%);
+  backdrop-filter: blur(7.5px);
+}
+
+.header-custom {
+  /*  background: rgba(17, 14, 32, 0.7); */
+  backdrop-filter: blur(9px);
+}
+
+.card {
+  margin: 7rem;
+  margin-top: 4rem;
+  flex-basis: 45%;
+  padding: 0.1rem;
+  text-align: left;
+  color: inherit;
+  color: #b423fd7a;
+  text-decoration: none;
+  border: 1px solid rgba(114, 38, 255, 0.5);
+  border-radius: 10px;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.index-card {
+  margin: 1rem;
+  width: 70%;
+  flex-basis: 45%;
+  padding: 0.1rem;
+  padding-left: 0.7rem;
+  padding-bottom: 0.7rem;
+  text-align: center;
+  color: inherit;
+  color: #cb6cfa7a;
+  text-decoration: none;
+  border: 1px solid rgba(114, 38, 255, 0.5);
+  border-radius: 10px;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.index-page-card {
+  margin: 10rem;
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+  flex-basis: 45%;
+  padding: 0.1rem;
+  text-align: left;
+  color: inherit;
+  color: #cb6cfa7a;
+  text-decoration: none;
+  border: 1px solid rgba(114, 38, 255, 0.5);
+  border-radius: 10px;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+/* .step-enter {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.step-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.step-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.step-exit-active {
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: opacity 300ms, transform 300ms;
+} */
+
+.step-fade-enter {
+  opacity: 0;
+}
+
+.step-fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms;
+}
+
+.step-fade-exit {
+  opacity: 1;
+}
+
+.step-fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+.recharts-surface {
+  width: 92vw !important;
+}

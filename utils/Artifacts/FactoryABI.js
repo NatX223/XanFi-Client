@@ -1,0 +1,8 @@
+export const factoryAbi = [
+    {"type":"function","name":"setChain","inputs":[{"name":"_chainId","type":"uint16","internalType":"uint16"},{"name":"_factoryAddress","type":"address","internalType":"address"}],"outputs":[],"stateMutability":"nonpayable"},
+    {"type":"function","name":"assets","inputs":[{"name":"","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},
+    {"type":"function","name":"createIndex","inputs":[{"name":"_name","type":"string","internalType":"string"},{"name":"_symbol","type":"string","internalType":"string"},{"name":"_owner","type":"address","internalType":"address"},{"name":"_assetContracts","type":"address[]","internalType":"address[]"},{"name":"_assetRatio","type":"uint256[]","internalType":"uint256[]"},{"name":"_assetChains","type":"uint16[]","internalType":"uint16[]"}],"outputs":[],"stateMutability":"payable"},
+    {"type":"function","name":"funds","inputs":[{"name":"","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"name","type":"string","internalType":"string"},{"name":"symbol","type":"string","internalType":"string"},{"name":"owner","type":"address","internalType":"address"}],"stateMutability":"view"},{"type":"function","name":"indicies","inputs":[{"name":"","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},
+    {"type":"function","name":"_fundCount","inputs":[],"outputs":[{"name":"_value","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},
+    {"type":"function","name":"tokenBridge","inputs":[],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"}
+]
