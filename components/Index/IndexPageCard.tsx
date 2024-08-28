@@ -12,6 +12,7 @@ type AssetRatio = {
 type TIndexItemProps = {
     name: string;
     description: string;
+    docId: string;
     sector: string;
     creator: string;
     chain: number;
@@ -19,7 +20,7 @@ type TIndexItemProps = {
     holders: number;
   };
 
-export function IndexDetails({ name, description, sector, creator, chain, holders, assets }: TIndexItemProps) {
+export function IndexDetails({ name, description, sector, creator, chain, holders, assets, docId }: TIndexItemProps) {
 
   return (
     <div>
