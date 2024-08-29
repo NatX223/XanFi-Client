@@ -1,4 +1,10 @@
-export const checkArrayOperation = (element: string, array: string[]) => {
+interface TokenInfo {
+    name: string;
+    address: string;
+    chain: number;
+  }
+
+export const checkArrayOperation = (element: TokenInfo, array: TokenInfo[]) => {
     if (array.length == 0) {
         return ({op: true, ind: 0});
     } else {

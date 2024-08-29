@@ -5,22 +5,27 @@ import type { NextPage } from "next";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAccount } from "wagmi";
+import { useEthersSigner } from "../utils/connection/adapter";
 import { IndexAssets } from "~~/components/Index/IndexAssets";
 import { IndexCategory } from "~~/components/Index/IndexCategory";
 import { IndexDetails } from "~~/components/Index/IndexDetails";
 import { createIndex } from "~~/utils/app";
 
-// record index
-// call index factory function
-
 const CreateIndex: NextPage = () => {
+  interface TokenInfo {
+    name: string;
+    address: string;
+    chain: number;
+  }
+
   const [currentStep, setCurrentStep] = useState(1);
   const [indexName, setIndexName] = useState("");
   const [IndexDescription, setIndexDescription] = useState("");
   const [indexCategory, setIndexCategory] = useState("");
-  const [assets, setAssets] = useState<string[]>([]);
+  const [assets, setAssets] = useState<TokenInfo[]>([]);
   const [isFinished, setIsFinished] = useState(false);
-  const { address, isConnected, chain } = useAccount();
+  const { address, isConnected, chain, chainId } = useAccount();
+  const signer = useEthersSigner();
 
   const handleNext = () => {
     
@@ -36,7 +41,7 @@ const CreateIndex: NextPage = () => {
   const handleFinish = async() => {
     try {
       console.log(indexName, IndexDescription, indexCategory, assets, chain?.name, address);
-      await createIndex(indexName, IndexDescription, indexCategory, assets, chain?.name, address);
+      await createIndex(indexName, IndexDescription, indexCategory, assets, chain?.name, chainId, signer);
       setCurrentStep(1);
       setIsFinished(false);
       toast.success("Index Created succesfully!");
@@ -52,7 +57,7 @@ const CreateIndex: NextPage = () => {
 
   const handleIndexCategory = (category: string) => setIndexCategory(category);
 
-  const handleIndexAssets = (assets: string[]) => setAssets(assets);
+  const handleIndexAssets = (assets: TokenInfo[]) => setAssets(assets);
 
   return (
     <>

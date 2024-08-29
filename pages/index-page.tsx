@@ -8,7 +8,9 @@ import { getIndex } from "~~/utils/Firebase/getIndecies";
 
 const Subscriptions: NextPage = () => {
   const router = useRouter();
-  const { id } = router.query;
+  const id: string | string[] | undefined = router.query.id;
+  const idString: string = Array.isArray(id) ? id[0] : id ?? '';
+
   const [index, setIndex] = useState<DocumentData | null>();
   // const [loading, setLoading] = useState<boolean>(true);
 
@@ -27,7 +29,7 @@ const Subscriptions: NextPage = () => {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree&display=swap" rel="stylesheet" />
       </Head>
-      {index && <IndexDetails name={index.name} description={index.description} sector={index.sector} creator={index.creator} chain={index.chain} holders={index.holders} assets={index.assets} docId={id}/>}
+      {index && <IndexDetails name={index.name} description={index.description} sector={index.sector} creator={index.creator} chain={index.chain} holders={index.holders} assets={index.assets} docId={idString}/>}
     </>
   );
 };

@@ -1,3 +1,9 @@
+interface TokenInfo {
+  name: string;
+  address: string;
+  chain: number;
+}
+
 export type SelectProps = {
   onSelect: (option: number) => void;
 };
@@ -19,5 +25,5 @@ export type CategoryProps = {
 };
 
 export type AssetsProps = {
-  onChange: (assets: string[]) => void;
+  onChange: (assets: TokenInfo[]) => void;
 };

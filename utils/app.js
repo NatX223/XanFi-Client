@@ -7,23 +7,28 @@ import { tokenAbi } from "./Artifacts/TokenABI";
 import { factoryAddresses, USDTAddresses } from "./Artifacts/Addresses";
 import { providers } from "./Artifacts/providers";
 
-export const createIndex = async(name, description, sector, assets, assetChains, chain, signer) => {
+export const createIndex = async(name, description, sector, assets, chain, chainId, signer) => {
     try {
         const ratio = 100 / assets.length;
 
         // Create an array filled with the division result
         const ratioArray = new Array(assets.length).fill(ratio);
-    
-        // Create the object with the original array and the result array
+        
+        const assetNames = assets.map(asset => asset.name);
+        const assetAddresses = assets.map(asset => asset.address);
+        const assetChains = assets.map(asset => asset.chain);
+
         const result = {
-            assetsArray: assets,
+            chainArray: assetChains,
+            nameArray: assetNames,
+            addressArray: assetAddresses,
             ratioArray: ratioArray,
         };
 
         const symbol = abbreviateName(name);
-        const factoryAddress = factoryAddresses[chain]; 
+        const factoryAddress = factoryAddresses[chainId]; 
         const factoryContract = new ethers.Contract(factoryAddress, factoryAbi, signer);
-        const createTX = await factoryContract.createIndex(name, symbol, signer.address, assets, ratioArray, assetChains);
+        const createTX = await factoryContract.createIndex(name, symbol, signer.address, assetAddresses, ratioArray, assetChains);
         const receipt = await createTX.wait();
 
         if (receipt.status === 1) {
@@ -44,12 +49,15 @@ export const createIndex = async(name, description, sector, assets, assetChains,
                 id: docCount
               });
               console.log('Index recorded', docRef.id);
+              return true;
         } else {
             console.error("Transaction failed!");
+            return false;
         }
 
     } catch (error) {
         console.error('Error adding document: ', error);
+        return false;
     }
 }
 

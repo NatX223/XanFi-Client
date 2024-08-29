@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { SUPPORTED_TOKENS } from "~~/networkHelpers";
+import { ASSET_TOKENS } from "~~/utils/Artifacts/tokens";
 import { AssetsProps } from "~~/types/SelectProp";
 import { checkArrayOperation } from "~~/utils/functionHelper";
 
-export function IndexAssets(prop: AssetsProps) {
-  const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
+interface TokenInfo {
+  name: string;
+  address: string;
+  chain: number;
+}
 
-  const handleConditionClick = (asset: string) => {
+export function IndexAssets(prop: AssetsProps) {
+  const [selectedAssets, setSelectedAssets] = useState<TokenInfo[]>([]);
+
+  const handleConditionClick = (asset: TokenInfo) => {
     const op = checkArrayOperation(asset, selectedAssets);
     const ind = op.ind;
     const op_ = op.op;
@@ -24,11 +30,11 @@ export function IndexAssets(prop: AssetsProps) {
     }
   };
 
-  const isAssetSelected = (asset: string) => {
+  const isAssetSelected = (asset: TokenInfo) => {
     return selectedAssets.includes(asset);
   };
 
-  const assets: string[] = Object.keys(SUPPORTED_TOKENS);
+  const assets: TokenInfo[] = Object.values(ASSET_TOKENS);
 
   return (
     <div>
@@ -44,7 +50,7 @@ export function IndexAssets(prop: AssetsProps) {
               onClick={() => handleConditionClick(asset)}
             >
               <div className="p-2 bg-[#00022C]">
-                <p className="font-medium text-center">{asset}</p>
+                <p className="font-medium text-center">{asset.name}</p>
               </div>
             </div>
           ))}
@@ -58,7 +64,7 @@ export function IndexAssets(prop: AssetsProps) {
               onClick={() => handleConditionClick(asset)}
             >
               <div className="p-2 bg-[#00022C]">
-                <p className="font-medium text-center">{asset}</p>
+                <p className="font-medium text-center">{asset.name}</p>
               </div>
             </div>
           ))}
