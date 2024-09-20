@@ -102,6 +102,58 @@ export const InvestFund = async(amount, docId, chain, signer) => {
       }
 }
 
+export const PortTokens = async(docId, amount, chainId, chain, signer) => {
+  try {
+    const docRef = doc(db, 'Indecies', docId);
+    const chainIds = [44787, 43113];
+
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const indexId = docSnap.data().id;
+      const provider = providers[chain];
+
+      var targetFactoryAddress;
+      var targetProvider;
+
+      for (const id of chainIds) {
+        if (factoryAddresses[id] == factoryAddresses[chain]) {
+          continue;
+        }
+        else{
+          targetFactoryAddress = factoryAddresses[id];
+          targetProvider = providers[id];
+        }
+      }
+
+      const factoryAddress = factoryAddresses[chain];
+      const factoryContract = new ethers.Contract(factoryAddress, factoryAbi, provider);
+      const indexAddress = await factoryContract.indicies(indexId);
+      const targetFactoryContract = new ethers.Contract(targetFactoryAddress, factoryAbi, targetProvider);
+      const targetIndexAddress = await targetFactoryContract.indicies(indexId);
+      const indexContract = new ethers.Contract(indexAddress, indexAbi, signer);
+
+      const portAmount = ethers.parseEther(amount);
+      
+      const portTx = await indexContract.migrateTokens(portAmount, chainId, targetIndexAddress);
+      const receipt = await portTx.wait();
+
+      if (receipt.status === 1) {
+        return true
+      } else {
+        console.log("error");
+        return false;
+      }
+
+    } else {
+      console.log("No such Index!");
+    }
+  } catch (e) {
+    console.error("Error Investing in Index", e);
+    throw e;
+  }
+}
+
 async function getIndexAddresses(indexId) {
     const indexAddresses = [];
 
