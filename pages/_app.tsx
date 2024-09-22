@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ConnectKitProvider } from "@particle-network/connectkit";
 import type { AppProps } from "next/app";
 import "../utils/fontawesome";
 import '@rainbow-me/rainbowkit/styles.css';
@@ -18,8 +19,7 @@ import {
   QueryClientProvider,
   QueryClient,
 } from "@tanstack/react-query";
-import { config } from "../utils/connection/wagmiConfig";
-
+import { config } from "../utils/connection/connectKitConfig";
 
 const queryClient = new QueryClient();
 
@@ -32,12 +32,8 @@ const DinamikoApp = ({ Component, pageProps }: AppProps) => {
   }, [isDarkMode]);
 
   return (
-    <WagmiProvider config={config}>
+    <ConnectKitProvider config={config}>
       <NextNProgress />
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-        avatar={BlockieAvatar}
-        theme={isDarkTheme ? darkTheme() : lightTheme()}>
                   <div className="flex flex-col min-h-screen bg-primary">
           <Header />
           <main className="relative flex flex-col flex-1">
@@ -46,9 +42,7 @@ const DinamikoApp = ({ Component, pageProps }: AppProps) => {
           <Footer />
         </div>
         <Toaster />
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    </ConnectKitProvider>
   );
 };
 
