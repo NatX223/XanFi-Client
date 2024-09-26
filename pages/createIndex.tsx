@@ -10,6 +10,16 @@ import { IndexAssets } from "~~/components/Index/IndexAssets";
 import { IndexCategory } from "~~/components/Index/IndexCategory";
 import { IndexDetails } from "~~/components/Index/IndexDetails";
 import { createIndex } from "~~/utils/app";
+import {
+  buildMultichainReadonlyClient,
+  buildRpcInfo,
+  initKlaster,
+  klasterNodeHost,
+  loadBicoV2Account,
+} from "klaster-sdk";
+import { createWalletClient, custom, http } from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+import { arbitrumSepolia, sepolia } from "viem/chains";
 
 const CreateIndex: NextPage = () => {
   interface TokenInfo {
@@ -26,6 +36,29 @@ const CreateIndex: NextPage = () => {
   const [isFinished, setIsFinished] = useState(false);
   const { address, isConnected, chain, chainId } = useAccount();
   const signer = useEthersSigner();
+
+  const signerAddress = signer?.address;
+ 
+  async function initializeKlaster(signerAddress: string): Promise<any> {
+    // Ensure that the signerAddress is in the correct format '0x${string}'
+    if (!/^0x[0-9a-fA-F]{40}$/.test(signerAddress)) {
+      throw new Error('Invalid Ethereum address format. Expected 0x-prefixed string.');
+    }
+  
+    const klaster = await initKlaster({
+      accountInitData: loadBicoV2Account({
+        owner: signerAddress as `0x${string}`, // Cast to the expected template literal type
+      }),
+      nodeUrl: klasterNodeHost.default,
+    });
+  
+    return klaster;
+  }
+
+  const mcClient = buildMultichainReadonlyClient([
+    buildRpcInfo(sepolia.id, "<sep-rpc-url>"),
+    buildRpcInfo(arbitrumSepolia.id, "<arbsep-rpc-url>"),
+  ]);
 
   const handleNext = () => {
     
