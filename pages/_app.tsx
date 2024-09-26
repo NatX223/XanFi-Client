@@ -19,7 +19,8 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { config } from "../utils/connection/wagmiConfig";
-
+import { OktoProvider, BuildType } from 'okto-sdk-react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,8 @@ const DinamikoApp = ({ Component, pageProps }: AppProps) => {
         <RainbowKitProvider
         avatar={BlockieAvatar}
         theme={isDarkTheme ? darkTheme() : lightTheme()}>
+          <GoogleOAuthProvider clientId = {process.env.GOOGLE_CLIENT_ID || ""}>
+          <OktoProvider apiKey={process.env.OKTO_CLIENT_API || ""} buildType={BuildType.SANDBOX}>
                   <div className="flex flex-col min-h-screen bg-primary">
           <Header />
           <main className="relative flex flex-col flex-1">
@@ -46,6 +49,8 @@ const DinamikoApp = ({ Component, pageProps }: AppProps) => {
           <Footer />
         </div>
         <Toaster />
+        </OktoProvider>
+        </GoogleOAuthProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
