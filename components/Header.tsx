@@ -4,6 +4,9 @@ import { useRouter } from "next/router";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
+import { useOkto } from "okto-sdk-react";
+import { GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const router = useRouter();
@@ -50,6 +53,38 @@ export const Header = () => {
     </>
   );
 
+  const router = useRouter();
+
+  const authenticate = useOkto();
+  const [authToken, setAuthToken] = useState();
+  const BASE_URL = "https://sandbox-api.okto.tech";
+  const OKTO_CLIENT_API = process.env.OKTO_CLIENT_API;
+
+  const apiService = axios.create({
+    baseURL: BASE_URL,
+    headers: {
+      "x-api-key": OKTO_CLIENT_API,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const handleGoogleLogin = async (credentialResponse: any) => {
+    console.log("Google login response:", credentialResponse);
+    const idToken = credentialResponse.credential;
+    console.log("google idtoken: ", idToken);
+    if (authenticate) {
+      authenticate.authenticate(idToken, async (authResponse: any, error: any) => {
+        if (authResponse) {
+          console.log("auth token received", authResponse);
+          // router.push("/index");
+        }
+        if (error) {
+          console.error("Authentication error:", error);
+        }
+      });
+    }
+  };
+
   return (
     <div className="sticky lg:static top-0 py-6 navbar min-h-0 flex-shrink-0 justify-between z-20 header-custom">
       <div className="navbar-start">
@@ -86,7 +121,18 @@ export const Header = () => {
       </div>
 
       <div className="navbar-end flex-grow mr-8">
-        <RainbowKitCustomConnectButton />
+      <div>
+      {!authToken ? (
+        <GoogleLogin
+          onSuccess={handleGoogleLogin}
+          onError={() => {
+            console.log("Login Failed");
+          }}
+        />
+      ) : (
+        <> Authenticated </>
+      )}
+    </div>
       </div>
     </div>
   );
