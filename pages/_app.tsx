@@ -33,7 +33,7 @@ const DinamikoApp = ({ Component, pageProps }: AppProps) => {
   }, [isDarkMode]);
 
   return (
-          <GoogleOAuthProvider clientId={"932751577922-r8jt1sh2urncc1l19a800vpm14knaua8.apps.googleusercontent.com"}>
+          <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID || ""}>
           <OktoProvider apiKey={process.env.OKTO_CLIENT_API || ""} buildType={BuildType.SANDBOX}>
                   <div className="flex flex-col min-h-screen bg-primary">
           <Header />
