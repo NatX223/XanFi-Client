@@ -10,16 +10,20 @@ import { IndexAssets } from "~~/components/Index/IndexAssets";
 import { IndexCategory } from "~~/components/Index/IndexCategory";
 import { IndexDetails } from "~~/components/Index/IndexDetails";
 import { createIndex } from "~~/utils/app";
-import {
-  buildMultichainReadonlyClient,
-  buildRpcInfo,
-  initKlaster,
-  klasterNodeHost,
-  loadBicoV2Account,
-} from "klaster-sdk";
-import { createWalletClient, custom, http } from "viem";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { arbitrumSepolia, sepolia } from "viem/chains";
+import { sepolia } from "viem/chains";
+import { IndexChain } from "~~/components/Index/IndexChain";
+// import {
+//   buildMultichainReadonlyClient,
+//   buildRpcInfo,
+//   initKlaster,
+//   klasterNodeHost,
+//   loadBicoV2Account,
+//   rawTx
+// } from "klaster-sdk";
+// import { createWalletClient, custom, http } from "viem";
+// import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+// import { arbitrumSepolia, sepolia } from "viem/chains";
+// import { ethers } from "ethers";
 
 const CreateIndex: NextPage = () => {
   interface TokenInfo {
@@ -32,49 +36,57 @@ const CreateIndex: NextPage = () => {
   const [indexName, setIndexName] = useState("");
   const [IndexDescription, setIndexDescription] = useState("");
   const [indexCategory, setIndexCategory] = useState("");
+  const [indexChain, setIndexChain] = useState(sepolia);
+  const [indexFee, setIndexFee] = useState("");
   const [assets, setAssets] = useState<TokenInfo[]>([]);
   const [isFinished, setIsFinished] = useState(false);
   const { address, isConnected, chain, chainId } = useAccount();
   const signer = useEthersSigner();
 
-  const signerAddress = signer?.address;
+  // const signerAddress = signer?.address;
  
-  async function initializeKlaster(signerAddress: string): Promise<any> {
-    // Ensure that the signerAddress is in the correct format '0x${string}'
-    if (!/^0x[0-9a-fA-F]{40}$/.test(signerAddress)) {
-      throw new Error('Invalid Ethereum address format. Expected 0x-prefixed string.');
-    }
+  // async function initializeKlaster(signerAddress: string): Promise<any> {
+  //   // Ensure that the signerAddress is in the correct format '0x${string}'
+  //   if (!/^0x[0-9a-fA-F]{40}$/.test(signerAddress)) {
+  //     throw new Error('Invalid Ethereum address format. Expected 0x-prefixed string.');
+  //   }
   
-    const klaster = await initKlaster({
-      accountInitData: loadBicoV2Account({
-        owner: signerAddress as `0x${string}`, // Cast to the expected template literal type
-      }),
-      nodeUrl: klasterNodeHost.default,
-    });
+  //   const klaster = await initKlaster({
+  //     accountInitData: loadBicoV2Account({
+  //       owner: signerAddress as `0x${string}`, // Cast to the expected template literal type
+  //     }),
+  //     nodeUrl: klasterNodeHost.default,
+  //   });
   
-    return klaster;
-  }
+  //   return klaster;
+  // }
 
-  const mcClient = buildMultichainReadonlyClient([
-    buildRpcInfo(sepolia.id, "<sep-rpc-url>"),
-    buildRpcInfo(arbitrumSepolia.id, "<arbsep-rpc-url>"),
-  ]);
+  // const mcClient = buildMultichainReadonlyClient([
+  //   buildRpcInfo(sepolia.id, "<sep-rpc-url>"),
+  //   buildRpcInfo(arbitrumSepolia.id, "<arbsep-rpc-url>"),
+  // ]);
+
+  // // Encode a simple transaction which sends 0.00001 of base currency. In our case - ETH
+  // const sendETH = rawTx({
+  //   gasLimit: BigInt(100000),
+  //   to: "0xdeDf26b9280620eaa52e0811bF7991a1B6aB077E", // Send back to the sender address. This is just for demo purposes
+  //   value: ethers.parseEther("0.00001"),
+  // });
 
   const handleNext = () => {
-    
     setCurrentStep(prevStep => prevStep + 1);
-    if (currentStep + 1 === 3) setIsFinished(true);
+    if (currentStep + 1 === 4) setIsFinished(true);
   };
 
   const handlePrevious = () => {
-    if (currentStep + 1 >= 3) setIsFinished(false);
+    if (currentStep + 1 >= 4) setIsFinished(false);
     setCurrentStep(prevStep => prevStep - 1);
   };
 
   const handleFinish = async() => {
     try {
-      console.log(indexName, IndexDescription, indexCategory, assets, chain?.name, address);
-      await createIndex(indexName, IndexDescription, indexCategory, assets, chain?.name, chainId, signer);
+      console.log(indexName, IndexDescription, indexCategory, assets, indexChain.name, address);
+      await createIndex(indexName, IndexDescription, indexCategory, assets, indexChain.name, indexChain.id, signer);
       setCurrentStep(1);
       setIsFinished(false);
       toast.success("Index Created succesfully!");
@@ -88,6 +100,9 @@ const CreateIndex: NextPage = () => {
     setIndexDescription(indexDescription);
   };
 
+  const handleIndexCategory = (category: string) => setIndexCategory(category);
+
+  const handleIndexChain = (chain: Chain) => setIndexCategory(category);
   const handleIndexCategory = (category: string) => setIndexCategory(category);
 
   const handleIndexAssets = (assets: TokenInfo[]) => setAssets(assets);
@@ -104,7 +119,8 @@ const CreateIndex: NextPage = () => {
       <section className="container mx-auto p-8">
         {currentStep === 1 && <IndexDetails onChange={handleIndexDetails} />}
         {currentStep === 2 && <IndexCategory onChange={handleIndexCategory} />}
-        {currentStep === 3 && <IndexAssets onChange={handleIndexAssets} />}
+        {currentStep === 3 && <IndexChain onChange={handleIndexAssets} />}
+        {currentStep === 4 && <IndexAssets onChange={handleIndexAssets} />}
 
         <ActionButtons
           onFinish={handleFinish}

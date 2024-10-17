@@ -1,3 +1,4 @@
+import { Chain } from "viem";
 interface TokenInfo {
   name: string;
   address: string;
@@ -26,4 +27,12 @@ export type CategoryProps = {
 
 export type AssetsProps = {
   onChange: (assets: TokenInfo[]) => void;
+};
+
+export type ChainProps = {
+  onChange: (chain: Chain) => void;
+};
+
+export type FeeProps = {
+  onChange: (fee: string) => void;
 };
