@@ -34,5 +34,7 @@ export type ChainProps = {
 };
 
 export type FeeProps = {
-  onChange: (fee: string) => void;
+  onMount: (fee: string) => void;
 };
+
+export interface IndexChainProps extends ChainProps, FeeProps {}

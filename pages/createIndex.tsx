@@ -12,6 +12,8 @@ import { IndexDetails } from "~~/components/Index/IndexDetails";
 import { createIndex } from "~~/utils/app";
 import { sepolia } from "viem/chains";
 import { IndexChain } from "~~/components/Index/IndexChain";
+import { Chain } from "viem";
+
 // import {
 //   buildMultichainReadonlyClient,
 //   buildRpcInfo,
@@ -36,7 +38,7 @@ const CreateIndex: NextPage = () => {
   const [indexName, setIndexName] = useState("");
   const [IndexDescription, setIndexDescription] = useState("");
   const [indexCategory, setIndexCategory] = useState("");
-  const [indexChain, setIndexChain] = useState(sepolia);
+  const [indexChain, setIndexChain] = useState<Chain>(sepolia);
   const [indexFee, setIndexFee] = useState("");
   const [assets, setAssets] = useState<TokenInfo[]>([]);
   const [isFinished, setIsFinished] = useState(false);
@@ -102,8 +104,8 @@ const CreateIndex: NextPage = () => {
 
   const handleIndexCategory = (category: string) => setIndexCategory(category);
 
-  const handleIndexChain = (chain: Chain) => setIndexCategory(category);
-  const handleIndexCategory = (category: string) => setIndexCategory(category);
+  const handleIndexChain = (chain: Chain) => setIndexChain(chain);
+  const handleIndexFee = (fee: string) => setIndexFee(fee);
 
   const handleIndexAssets = (assets: TokenInfo[]) => setAssets(assets);
 
@@ -119,7 +121,7 @@ const CreateIndex: NextPage = () => {
       <section className="container mx-auto p-8">
         {currentStep === 1 && <IndexDetails onChange={handleIndexDetails} />}
         {currentStep === 2 && <IndexCategory onChange={handleIndexCategory} />}
-        {currentStep === 3 && <IndexChain onChange={handleIndexAssets} />}
+        {currentStep === 3 && <IndexChain onChange={handleIndexChain} onMount={handleIndexFee} />}
         {currentStep === 4 && <IndexAssets onChange={handleIndexAssets} />}
 
         <ActionButtons

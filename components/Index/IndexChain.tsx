@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { ChainProps, FeeProps } from "~~/types/SelectProp";
+import { IndexChainProps } from "~~/types/SelectProp";
 import { Chain } from "viem";
-import { baseSepolia, sepolia } from "viem/chains";
+import { arbitrumSepolia, sepolia } from "viem/chains";
 
-
-export function IndexChain(prop: ChainProps, feeProp: FeeProps) {
+export function IndexChain(props: IndexChainProps) {
   const [selectedChain, setselectedChain] = useState<Chain>(sepolia);
   const [selectedFee, setselectedFee] = useState<string>("");
 
+  const { onChange, onMount } = props;
+
   const handleChainClick = (chain: Chain) => {
     setselectedChain(chain);
-    prop.onChange(chain);
+    onChange(chain);
   };
 
   const handleFeeClick = (fee: string) => {
     setselectedFee(fee);
-    feeProp.onChange(fee);
+    onMount(fee);
   };
 
-  const chains: Chain[] = [sepolia, baseSepolia];
-  const feeTokens: string[] = ["USDC", "WETH", "LINK"];
+  const chains: Chain[] = [sepolia, arbitrumSepolia];
+  const feeTokens: string[] = ["WETH", "LINK"];
 
   const isSelectedChain = (chain: Chain) => {
     return chain.id === selectedChain.id;
