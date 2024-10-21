@@ -1,9 +1,5 @@
 import { Chain } from "viem";
-interface TokenInfo {
-  name: string;
-  address: string;
-  chain: number;
-}
+import { TokenInfo } from "~~/utils/Artifacts/tokens";
 
 export type SelectProps = {
   onSelect: (option: number) => void;

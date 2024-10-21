@@ -4,10 +4,22 @@ import { collection, addDoc, doc, getDoc, getDocs } from 'firebase/firestore';
 import { factoryAbi } from "./Artifacts/FactoryABI";
 import { indexAbi } from "./Artifacts/IndexABI";
 import { tokenAbi } from "./Artifacts/TokenABI";
-import { factoryAddresses, USDTAddresses } from "./Artifacts/Addresses";
+import { factoryAddresses, USDCAddresses } from "./Artifacts/Addresses";
 import { providers } from "./Artifacts/providers";
 
-export const createIndex = async(name, description, sector, assets, chain, chainId, signer) => {
+import {
+  buildItx,
+  buildMultichainReadonlyClient,
+  buildRpcInfo,
+  initKlaster,
+  klasterNodeHost,
+  loadBicoV2Account,
+  rawTx,
+  singleTx
+} from "klaster-sdk";
+import { encodeFunctionData } from "viem";
+
+export const createIndex = async(name, description, sector, assets, chain, indexFee, signer) => {
     try {
         const ratio = 100 / assets.length;
 
@@ -15,45 +27,81 @@ export const createIndex = async(name, description, sector, assets, chain, chain
         const ratioArray = new Array(assets.length).fill(ratio);
         
         const assetNames = assets.map(asset => asset.name);
-        const assetAddresses = assets.map(asset => asset.address);
-        const assetChains = assets.map(asset => asset.chain);
+        var assetAddresses;
+
+        if (chain.id === 421_614) {
+          assetAddresses = assets.map(asset => asset.arbitrumAddress);
+        } else {
+          assetAddresses = assets.map(asset => asset.sepoliaAddress);
+        }
 
         const result = {
-            chainArray: assetChains,
             nameArray: assetNames,
             addressArray: assetAddresses,
             ratioArray: ratioArray,
         };
 
         const symbol = abbreviateName(name);
-        const factoryAddress = factoryAddresses[chainId]; 
-        const factoryContract = new ethers.Contract(factoryAddress, factoryAbi, signer);
-        const createTX = await factoryContract.createIndex(name, symbol, signer.address, assetAddresses, ratioArray, assetChains);
-        const receipt = await createTX.wait();
+        const factoryAddress = factoryAddresses[chain.id];
+        // const factoryContract = new ethers.Contract(factoryAddress, factoryAbi, signer);
+        // const createTX = await factoryContract.createIndex(name, symbol, signer.address, assetAddresses, ratioArray, assetChains);
+        // const receipt = await createTX.wait();
 
-        if (receipt.status === 1) {
-            const indeciesCollection = collection(db, 'Indecies');
+        const klaster = await initKlaster({
+          accountInitData: loadBicoV2Account({
+            owner: signer.address,
+          }),
+          nodeUrl: klasterNodeHost.default,
+        });
 
-            const snapshot = await getDocs(indeciesCollection);
-            const docCount = snapshot.size;
+        const createOp = rawTx({
+          gasLimit: 1000000n,
+          to: factoryAddress,
+          data: encodeFunctionData({
+            abi: factoryAbi,
+            functionName: "createIndex",
+            args: [name, symbol, assetAddresses, ratioArray]
+          })
+        });
 
-            // call function to deploy on another chain here
-            const docRef = await addDoc(collection(db, 'Indecies'), {
-                name: name,
-                description: description,
-                sector: sector,
-                assets: result,
-                holders: 0,
-                chain: chain,
-                creator: signer.address,
-                id: docCount
-              });
-              console.log('Index recorded', docRef.id);
+        console.log("chainId", chain.id);
+
+        const createTx = buildItx({
+          steps: [singleTx(chain.id, createOp)],
+          feeTx: klaster.encodePaymentFee(chain.id, "USDC")
+        });
+
+        const quote = await klaster.getQuote(createTx);
+        const arrayifiedHash = ethers.getBytes(quote.itxHash);
+        console.log(arrayifiedHash, quote.itxHash);
+        const signed = await signer.signMessage(arrayifiedHash);
+
+        const _result = await klaster.execute(quote, signed);
+        console.log(_result.itxHash);
+
+        // if (receipt.status === 1) {
+            // const indeciesCollection = collection(db, 'Indecies');
+
+            // const snapshot = await getDocs(indeciesCollection);
+            // const docCount = snapshot.size;
+
+            // // call function to deploy on another chain here
+            // const docRef = await addDoc(collection(db, 'Indecies'), {
+            //     name: name,
+            //     description: description,
+            //     sector: sector,
+            //     assets: result,
+            //     holders: 0,
+            //     chain: chain.name,
+            //     creator: signer.address,
+            //     id: docCount
+            //   });
+            //   console.log('Index recorded', docRef.id);
               return true;
-        } else {
-            console.error("Transaction failed!");
-            return false;
-        }
+        // } else {
+        //     console.error("Transaction failed!");
+        //     return false;
+        // }
 
     } catch (error) {
         console.error('Error adding document: ', error);
@@ -79,9 +127,9 @@ export const InvestFund = async(amount, docId, chain, signer) => {
           const indexAddresses = await getIndexAddresses(indexId);
           const purchaseAmount = ethers.parseEther(amount);
 
-          const usdtAddress = USDTAddresses[chain];
-          const usdt = new ethers.Contract(usdtAddress, tokenAbi, signer);
-          await usdt.approve(indexAddress, purchaseAmount);
+          const usdcAddress = USDCAddresses[chain];
+          const usdc = new ethers.Contract(usdcAddress, tokenAbi, signer);
+          await usdc.approve(indexAddress, purchaseAmount);
           
           const investTx = await indexContract.InvestFund(purchaseAmount, indexAddresses);
           const receipt = await investTx.wait();

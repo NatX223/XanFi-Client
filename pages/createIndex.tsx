@@ -8,10 +8,12 @@ import { useAccount } from "wagmi";
 import { useEthersSigner } from "../utils/connection/adapter";
 import { IndexAssets } from "~~/components/Index/IndexAssets";
 import { IndexCategory } from "~~/components/Index/IndexCategory";
+import { IndexChain } from "~~/components/Index/IndexChain";
 import { IndexDetails } from "~~/components/Index/IndexDetails";
 import { createIndex } from "~~/utils/app";
+import { TokenInfo } from "~~/utils/Artifacts/tokens";
 import { sepolia } from "viem/chains";
-import { IndexChain } from "~~/components/Index/IndexChain";
+
 import { Chain } from "viem";
 
 // import {
@@ -28,11 +30,6 @@ import { Chain } from "viem";
 // import { ethers } from "ethers";
 
 const CreateIndex: NextPage = () => {
-  interface TokenInfo {
-    name: string;
-    address: string;
-    chain: number;
-  }
 
   const [currentStep, setCurrentStep] = useState(1);
   const [indexName, setIndexName] = useState("");
@@ -88,7 +85,7 @@ const CreateIndex: NextPage = () => {
   const handleFinish = async() => {
     try {
       console.log(indexName, IndexDescription, indexCategory, assets, indexChain.name, address);
-      await createIndex(indexName, IndexDescription, indexCategory, assets, indexChain.name, indexChain.id, signer);
+      await createIndex(indexName, IndexDescription, indexCategory, assets, indexChain, indexFee, signer);
       setCurrentStep(1);
       setIsFinished(false);
       toast.success("Index Created succesfully!");

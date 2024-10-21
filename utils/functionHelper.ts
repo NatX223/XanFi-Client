@@ -1,8 +1,4 @@
-interface TokenInfo {
-    name: string;
-    address: string;
-    chain: number;
-  }
+import { TokenInfo } from "~~/utils/Artifacts/tokens";
 
 export const checkArrayOperation = (element: TokenInfo, array: TokenInfo[]) => {
     if (array.length == 0) {

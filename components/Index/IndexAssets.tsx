@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { ASSET_TOKENS } from "~~/utils/Artifacts/tokens";
+import { ASSET_TOKENS, TokenInfo } from "~~/utils/Artifacts/tokens";
 import { AssetsProps } from "~~/types/SelectProp";
 import { checkArrayOperation } from "~~/utils/functionHelper";
-
-interface TokenInfo {
-  name: string;
-  address: string;
-  chain: number;
-}
 
 export function IndexAssets(prop: AssetsProps) {
   const [selectedAssets, setSelectedAssets] = useState<TokenInfo[]>([]);
