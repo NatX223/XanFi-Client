@@ -42,36 +42,6 @@ const CreateIndex: NextPage = () => {
   const { address, isConnected, chain, chainId } = useAccount();
   const signer = useEthersSigner();
 
-  // const signerAddress = signer?.address;
- 
-  // async function initializeKlaster(signerAddress: string): Promise<any> {
-  //   // Ensure that the signerAddress is in the correct format '0x${string}'
-  //   if (!/^0x[0-9a-fA-F]{40}$/.test(signerAddress)) {
-  //     throw new Error('Invalid Ethereum address format. Expected 0x-prefixed string.');
-  //   }
-  
-  //   const klaster = await initKlaster({
-  //     accountInitData: loadBicoV2Account({
-  //       owner: signerAddress as `0x${string}`, // Cast to the expected template literal type
-  //     }),
-  //     nodeUrl: klasterNodeHost.default,
-  //   });
-  
-  //   return klaster;
-  // }
-
-  // const mcClient = buildMultichainReadonlyClient([
-  //   buildRpcInfo(sepolia.id, "<sep-rpc-url>"),
-  //   buildRpcInfo(arbitrumSepolia.id, "<arbsep-rpc-url>"),
-  // ]);
-
-  // // Encode a simple transaction which sends 0.00001 of base currency. In our case - ETH
-  // const sendETH = rawTx({
-  //   gasLimit: BigInt(100000),
-  //   to: "0xdeDf26b9280620eaa52e0811bF7991a1B6aB077E", // Send back to the sender address. This is just for demo purposes
-  //   value: ethers.parseEther("0.00001"),
-  // });
-
   const handleNext = () => {
     setCurrentStep(prevStep => prevStep + 1);
     if (currentStep + 1 === 4) setIsFinished(true);

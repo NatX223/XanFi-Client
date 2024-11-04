@@ -25,6 +25,7 @@
     "@types/numeral": "^2.0.2",
     "@types/recharts": "^1.8.24",
     "@uniswap/sdk": "^3.0.3",
+    "axios": "^1.7.7",
     "chart.js": "^4.4.3",
     "chartjs-plugin-datalabels": "^2.2.0",
     "daisyui": "^2.31.0",

@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { useEthersSigner } from "../../utils/connection/adapter";
-import { InvestFund } from "../../utils/app";
+import { getUnifiedBalance, InvestFund } from "../../utils/app";
 import { ToastContainer, toast } from "react-toastify";
 import { AssetsChart, PerformanceChart } from "./IndexChart";
 
@@ -24,11 +24,23 @@ type TIndexItemProps = {
   };
 
 export function IndexDetails({ name, description, sector, creator, chain, holders, assets, docId }: TIndexItemProps) {
-    const { chainId } = useAccount();
+    const { chainId, address } = useAccount();
 	const signer = useEthersSigner();
 
+    const [uBal, setUBal] = useState(0);
     const [investAmount, setInvestAmount] = useState('');
     const [portAmount, setPortAmount] = useState('');
+
+    useEffect(() => {
+        const fetchBalance = async() => {
+            const uBalance = await getUnifiedBalance(address);
+            const _balance = Number(uBalance.balance) / (10 ** uBalance.decimals);
+            const balance = Number(_balance).toFixed(2);
+            setUBal(Number(balance));
+        };
+
+        fetchBalance();
+    })
 
     const handleInvestAmountChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const inputValue = e.target.value;
@@ -72,6 +84,16 @@ export function IndexDetails({ name, description, sector, creator, chain, holder
   return (
     <div>
         <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
+            <div className="card-body px-12 py-8">
+                <div className="relative grid grid-rows-2 gap-2">
+                    <div className="flex justify-between">
+                        <h1 className="text-2xl font-semibold">Unified Balance</h1>
+                        <span>${uBal}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
             <div className='card-body px-12 py-8'>
                     <div>
                         <h1 className="text-2xl font-semibold"> Details </h1>
@@ -81,7 +103,7 @@ export function IndexDetails({ name, description, sector, creator, chain, holder
                         <h3> Description: {description} </h3>
                         <h3> Category: {sector} </h3>
                         <h3> Created By: {creator} </h3>
-                        <h3> Primary Chain: {chain} </h3>
+                        <h3> Chain: {chain} </h3>
                         <h3> Holders: {holders} </h3>
                         {/* <h3> price: ... </h3> */}
                     </div>

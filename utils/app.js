@@ -3,10 +3,11 @@ const { ethers } = require("ethers");
 import { collection, addDoc, doc, getDoc, getDocs } from 'firebase/firestore';
 import { factoryAbi } from "./Artifacts/FactoryABI";
 import { indexAbi } from "./Artifacts/IndexABI";
-import { tokenAbi } from "./Artifacts/TokenABI";
 import { factoryAddresses, USDCAddresses } from "./Artifacts/Addresses";
 import { providers } from "./Artifacts/providers";
-
+import { encodeFunctionData } from "viem";
+import { acrossBridgePlugin } from "./acrossBridgePlugin";
+mcClient
 import {
   buildItx,
   buildMultichainReadonlyClient,
@@ -15,13 +16,15 @@ import {
   klasterNodeHost,
   loadBicoV2Account,
   rawTx,
-  singleTx
+  singleTx,
+  batchTx
 } from "klaster-sdk";
-import { encodeFunctionData } from "viem";
+import { arbitrumSepolia } from "viem/chains";
+import { mcClient, mUSDC } from "./unifiedBalanceParams";
 
 export const createIndex = async(name, description, sector, assets, chain, indexFee, signer) => {
     try {
-        const ratio = 100 / assets.length;
+        const ratio = Math.floor(100 / assets.length);
 
         // Create an array filled with the division result
         const ratioArray = new Array(assets.length).fill(ratio);
@@ -55,7 +58,7 @@ export const createIndex = async(name, description, sector, assets, chain, index
         });
 
         const createOp = rawTx({
-          gasLimit: 1000000n,
+          gasLimit: 3000000n,
           to: factoryAddress,
           data: encodeFunctionData({
             abi: factoryAbi,
@@ -79,30 +82,25 @@ export const createIndex = async(name, description, sector, assets, chain, index
         const _result = await klaster.execute(quote, signed);
         console.log(_result.itxHash);
 
-        // if (receipt.status === 1) {
-            // const indeciesCollection = collection(db, 'Indecies');
+        const indeciesCollection = collection(db, 'Indecies');
 
-            // const snapshot = await getDocs(indeciesCollection);
-            // const docCount = snapshot.size;
+        const snapshot = await getDocs(indeciesCollection);
+        const docCount = snapshot.size;
 
-            // // call function to deploy on another chain here
-            // const docRef = await addDoc(collection(db, 'Indecies'), {
-            //     name: name,
-            //     description: description,
-            //     sector: sector,
-            //     assets: result,
-            //     holders: 0,
-            //     chain: chain.name,
-            //     creator: signer.address,
-            //     id: docCount
-            //   });
-            //   console.log('Index recorded', docRef.id);
-              return true;
-        // } else {
-        //     console.error("Transaction failed!");
-        //     return false;
-        // }
-
+        // call function to deploy on another chain here
+        const docRef = await addDoc(collection(db, 'Indecies'), {
+          name: name,
+          description: description,
+          sector: sector,
+          assets: result,
+          holders: 0,
+          chain: chain.name,
+          chainId: chain.id,
+          creator: signer.address,
+          id: docCount
+        });
+        console.log('Index recorded', docRef.id);
+        return true;
     } catch (error) {
         console.error('Error adding document: ', error);
         return false;
@@ -112,34 +110,122 @@ export const createIndex = async(name, description, sector, assets, chain, index
 export const InvestFund = async(amount, docId, chain, signer) => {
     try {
         const docRef = doc(db, 'Indecies', docId);
-
         const docSnap = await getDoc(docRef);
+
+        const uBalance = await getUnifiedBalance(signer);
+
+        const klaster = await initKlaster({
+          accountInitData: loadBicoV2Account({
+            owner: signer.address,
+          }),
+          nodeUrl: klasterNodeHost.default,
+        });
         
         if (docSnap.exists()) {
           const indexId = docSnap.data().id;
+          const chainId = docSnap.data().chainId;
           const provider = providers[chain];
+
+          const recipient = klaster.account.getAddress(chainId);
 
           const factoryAddress = factoryAddresses[chain]; 
           const factoryContract = new ethers.Contract(factoryAddress, factoryAbi, provider);
           const indexAddress = await factoryContract.indicies(indexId);
-          const indexContract = new ethers.Contract(indexAddress, indexAbi, signer);
 
-          const indexAddresses = await getIndexAddresses(indexId);
-          const purchaseAmount = ethers.parseEther(amount);
+          const purchaseAmount = amount * amount * (10 ** uBalance.decimals);
 
-          const usdcAddress = USDCAddresses[chain];
-          const usdc = new ethers.Contract(usdcAddress, tokenAbi, signer);
-          await usdc.approve(indexAddress, purchaseAmount);
-          
-          const investTx = await indexContract.InvestFund(purchaseAmount, indexAddresses);
-          const receipt = await investTx.wait();
+          const chainBreakdown = uBalance.breakdown.find(b => b.chainId === chainId);
+          const chainBalance = chainBreakdown.balance;
 
-          if (receipt.status === 1) {
+          if (purchaseAmount >= chainBalance) {
+            const bridgeAmount = purchaseAmount - chainBalance;
+
+            const bridgingOps = await encodeBridgingOps({
+              tokenMapping: mUSDC,
+              account: klaster.account,
+              amount: bridgeAmount,
+              bridgePlugin: acrossBridgePlugin,
+              client: mcClient,
+              destinationChainId: base.id,
+              unifiedBalance: uBalance,
+            });
+
+            const sendERC20Op = rawTx({
+              gasLimit: 2000000n,
+              to: destChainTokenAddress,
+              data: encodeFunctionData({
+                abi: erc20Abi,
+                functionName: "transfer",
+                args: [recipient, bridgingOps.totalReceivedOnDestination],
+              }),
+            });
+
+            const approveOp = encodeApproveTx({
+              tokenAddress: USDCAddresses[chainId],
+              amount: purchaseAmount,
+              recipient: indexAddress
+            });
+
+            const investOp = rawTx({
+              gasLimit: 2000000n,
+              to: indexAddress,
+              data: encodeFunctionData({
+                abi: indexAbi,
+                functionName: "investFund",
+                args: [purchaseAmount],
+              }),
+            });
+
+            const investTx = batchTx(chainId, sendERC20Op, approveOp, investOp)
+
+            const iTx = buildItx({
+              steps: bridgingOps.steps.concat(investTx),
+              feeTx: klaster.encodePaymentFee(arbitrumSepolia.id, "USDC"),
+            });
+
+            const quote = await klaster.getQuote(iTx);
+            const arrayifiedHash = ethers.getBytes(quote.itxHash);
+            console.log(arrayifiedHash, quote.itxHash);
+            const signed = await signer.signMessage(arrayifiedHash);
+    
+            const _result = await klaster.execute(quote, signed);
+            console.log(_result.itxHash);
+
             return true
           } else {
-            console.log("error");
-            return false;
+            const approveOp = encodeApproveTx({
+              tokenAddress: USDCAddresses[chainId],
+              amount: purchaseAmount,
+              recipient: indexAddress
+            });
+
+            const investOp = rawTx({
+              gasLimit: 2000000n,
+              to: indexAddress,
+              data: encodeFunctionData({
+                abi: indexAbi,
+                functionName: "investFund",
+                args: [purchaseAmount],
+              }),
+            });
+
+            const investTx = batchTx(chainId, sendERC20Op, approveOp, investOp)
+
+            const iTx = buildItx({
+              steps: [investTx],
+              feeTx: klaster.encodePaymentFee(arbitrumSepolia.id, "USDC"),
+            });
+
+            const quote = await klaster.getQuote(iTx);
+            const arrayifiedHash = ethers.getBytes(quote.itxHash);
+            console.log(arrayifiedHash, quote.itxHash);
+            const signed = await signer.signMessage(arrayifiedHash);
+    
+            const _result = await klaster.execute(quote, signed);
+            console.log(_result.itxHash);
           }
+
+          return true
 
         } else {
           console.log("No such Index!");
@@ -148,26 +234,6 @@ export const InvestFund = async(amount, docId, chain, signer) => {
         console.error("Error Investing in Index", e);
         throw e;
       }
-}
-
-async function getIndexAddresses(indexId) {
-    const indexAddresses = [];
-
-    // Iterate through the providers
-    for (const [chainId, provider] of Object.entries(providers)) {
-        const factoryAddress = factoryAddresses[chainId];
-
-        // Initialize the contract instance with the provider
-        const factoryContract = new ethers.Contract(factoryAddress, factoryAbi, provider);
-
-        // Fetch the index address for the given indexId
-        const indexAddress = await factoryContract.indicies(indexId);
-
-        // Convert the address to a string and add to the array
-        indexAddresses.push(indexAddress.toString());
-    }
-
-    return indexAddresses;
 }
 
 function abbreviateName(name) {
@@ -181,4 +247,20 @@ function abbreviateName(name) {
     }
 
     return symbol;
+}
+
+export const getUnifiedBalance = async(address) => {
+  const klaster = await initKlaster({
+    accountInitData: loadBicoV2Account({
+      owner: address,
+    }),
+    nodeUrl: klasterNodeHost.default,
+  });
+
+  const uBalance = await mcClient.getUnifiedErc20Balance({
+    tokenMapping: mUSDC,
+    account: klaster.account,
+  });
+  
+  return uBalance;
 }
