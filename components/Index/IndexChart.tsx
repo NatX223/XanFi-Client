@@ -133,7 +133,7 @@ export const PerformanceChart = ({ ratios, symbols }: { ratios: number[], symbol
     useEffect(() => {
         const fetchAndCalculatePerformance = async () => {
             const rates = await fetchLast7DaysData();
-            const performanceData = calculatePerformance(rates, symbols, ratios);
+            const performanceData = calculatePerformance(rates, ["BTC", "ETH"], [50, 50]);
             const data = formatChartData(performanceData);
             setChartData(data);
         };

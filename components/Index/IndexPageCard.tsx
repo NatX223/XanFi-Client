@@ -117,14 +117,14 @@ export function IndexDetails({ name, description, sector, creator, chain, holder
                         <AssetsChart ratio={assets.ratioArray} assets={assets.nameArray}/>
             </div>
         </div>
-        {/* <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
+        <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
             <div className='card-body px-12 py-8'>
                         <div>
                             <h1 className="text-2xl font-semibold"> Performance </h1>
                         </div>
                         <PerformanceChart ratios={assets.ratioArray} symbols={assets.nameArray}/>
             </div>
-        </div> */}
+        </div>
         <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
             <div className='card-body px-12 py-8'>
                     <div className='relative grid grid-rows-2 gap-2'>
