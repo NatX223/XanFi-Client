@@ -86,7 +86,7 @@ const Home: NextPage = () => {
               <div className="border border-accent rounded-lg p-1">
                 <div className="border border-accent rounded-lg p-1">
                   <div className=" rounded-lg bg-gradient-2-0 px-16 py-10 shadow-md">
-                    Wormhole.
+                    Klaster.
                   </div>
                 </div>
               </div>

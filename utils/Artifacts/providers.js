@@ -1,6 +1,7 @@
+import { sepolia, arbitrumSepolia } from "viem/chains";
 const { ethers } = require("ethers");
 
 export const providers = {
-    44787: new ethers.JsonRpcProvider("https://alfajores-forno.celo-testnet.org"),
-    43113: new ethers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
+    11_155_111: new ethers.JsonRpcProvider(sepolia.rpcUrls.default.http[0]),
+    421_614: new ethers.JsonRpcProvider(arbitrumSepolia.rpcUrls.default.http[0])
 };
