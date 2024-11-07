@@ -20,7 +20,7 @@ export function IndexChain(props: IndexChainProps) {
   };
 
   const chains: Chain[] = [sepolia, arbitrumSepolia];
-  const feeTokens: string[] = ["WETH", "LINK"];
+  const feeTokens: string[] = ["USDC", "LINK"];
 
   const isSelectedChain = (chain: Chain) => {
     return chain.id === selectedChain.id;

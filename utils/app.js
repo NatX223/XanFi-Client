@@ -71,7 +71,7 @@ export const createIndex = async(name, description, sector, assets, chain, index
 
         const createTx = buildItx({
           steps: [singleTx(chain.id, createOp)],
-          feeTx: klaster.encodePaymentFee(feeChain, "USDC")
+          feeTx: klaster.encodePaymentFee(feeChain, indexFee)
         });
 
         const quote = await klaster.getQuote(createTx);

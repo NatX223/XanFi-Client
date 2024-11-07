@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { useEthersSigner } from "../../utils/connection/adapter";
-import { getUnifiedBalance, InvestFund } from "../../utils/app";
+import { getUnifiedBalance, InvestFund, ReplaceToken } from "../../utils/app";
 import { ToastContainer, toast } from "react-toastify";
 import { AssetsChart, PerformanceChart } from "./IndexChart";
+import { ASSET_TOKENS, TokenInfo } from "~~/utils/Artifacts/tokens";
+import { sepolia, arbitrumSepolia } from "viem/chains";
 
 type assets = {
     chainArray: number[];
@@ -18,18 +20,21 @@ type TIndexItemProps = {
     docId: string;
     sector: string;
     creator: string;
-    chain: number;
+    chain: string;
+    chainId: number;
     assets: assets;
     holders: number;
   };
 
-export function IndexDetails({ name, description, sector, creator, chain, holders, assets, docId }: TIndexItemProps) {
-    const { chainId, address } = useAccount();
+export function IndexDetails({ name, description, sector, creator, chain, chainId, holders, assets, docId }: TIndexItemProps) {
+    const { address } = useAccount();
 	const signer = useEthersSigner();
 
     const [uBal, setUBal] = useState(0);
     const [investAmount, setInvestAmount] = useState('');
-    const [portAmount, setPortAmount] = useState('');
+    const [redeemAmount, setRedeemAmount] = useState('');
+    const [oldAsset, setOldAsset] = useState('');
+    const [newAsset, setNewAsset] = useState('');
 
     useEffect(() => {
         const fetchBalance = async() => {
@@ -57,7 +62,7 @@ export function IndexDetails({ name, description, sector, creator, chain, holder
         }
     };
 
-    const handlePortAmountChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const handleRedeemAmountChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const inputValue = e.target.value;
 
         // Regular expression to check for positive numbers (integers or decimals)
@@ -65,12 +70,13 @@ export function IndexDetails({ name, description, sector, creator, chain, holder
 
         // Ensure value is valid and not 0 or negative
         if (isValid && parseFloat(inputValue) > 0) {
-            setPortAmount(inputValue);
+            setRedeemAmount(inputValue);
         } else if (inputValue === '') {
             // Allow clearing the input
-            setPortAmount('');
+            setRedeemAmount('');
         }
     };
+
 
     const handleInvestClick = async () => {
         const success = await InvestFund(investAmount, docId, chainId, signer);
@@ -80,6 +86,26 @@ export function IndexDetails({ name, description, sector, creator, chain, holder
             toast.success("Index Investment unsuccesfull!");
         }
     }
+
+    const handleRedeemClick = async () => {
+        const success = await InvestFund(redeemAmount, docId, chainId, signer);
+        if (success) {
+            toast.success("Token sale succesfull!");
+        } else {
+            toast.success("Token sale unsuccesfull!");
+        }
+    }
+
+    const handleReplaceClick = async () => {
+        const success = await ReplaceToken(oldAsset, newAsset, docId, chainId, signer);
+        if (success) {
+            toast.success("Token replacement succesfull!");
+        } else {
+            toast.success("Token replacement unsuccesfull!");
+        }
+    }
+
+    const newAssets: TokenInfo[] = Object.values(ASSET_TOKENS);
 
   return (
     <div>
@@ -117,14 +143,14 @@ export function IndexDetails({ name, description, sector, creator, chain, holder
                         <AssetsChart ratio={assets.ratioArray} assets={assets.nameArray}/>
             </div>
         </div>
-        <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
+        {/* <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
             <div className='card-body px-12 py-8'>
                         <div>
                             <h1 className="text-2xl font-semibold"> Performance </h1>
                         </div>
                         <PerformanceChart ratios={assets.ratioArray} symbols={assets.nameArray}/>
             </div>
-        </div>
+        </div> */}
         <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
             <div className='card-body px-12 py-8'>
                     <div className='relative grid grid-rows-2 gap-2'>
@@ -137,13 +163,39 @@ export function IndexDetails({ name, description, sector, creator, chain, holder
                                     <input className="border border-bg-gradient rounded p-1 bg-gray-400 text-white" type="string" 
                                     value={investAmount}
                                     onChange={handleInvestAmountChange}/>
-                                    <select
+                                    {/* <select
                                     className="border rounded border-gray-300 px-2 py-2 text-black">
-                                        <option value="usdt">USDT</option>
-                                    </select>
+                                        <option value="usdt">USDC</option>
+                                    </select> */}
                                     <button className="bg-gradient2 text-white py-2 px-4 rounded border-2 border-white cursor-pointer"
                                     onClick={handleInvestClick}>
                                         Invest
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
+            <div className='card-body px-12 py-8'>
+                    <div className='relative grid grid-rows-2 gap-2'>
+                        <div>
+                        <h1 className="text-2xl font-semibold"> Redeem </h1>
+                        </div>
+                        <div>
+                            <div>
+                                <div className="relative grid grid-cols-3 gap-2">
+                                    <input className="border border-bg-gradient rounded p-1 bg-gray-400 text-white" type="string" 
+                                    value={investAmount}
+                                    onChange={handleRedeemAmountChange}/>
+                                    {/* <select
+                                    className="border rounded border-gray-300 px-2 py-2 text-black">
+                                        <option value="usdt">USDC</option>
+                                    </select> */}
+                                    <button className="bg-gradient2 text-white py-2 px-4 rounded border-2 border-white cursor-pointer"
+                                    onClick={handleRedeemClick}>
+                                        Redeem
                                     </button>
                                 </div>
                             </div>
@@ -162,20 +214,27 @@ export function IndexDetails({ name, description, sector, creator, chain, holder
                                 <div className="relative grid grid-cols-3 gap-2">
                                     {/* asset tokens */}
                                     <select
-                                    className="border rounded border-gray-300 px-2 py-2 text-black">
-                                        <option value="Celo">Celo</option>
-                                        <option value="BSC">BSC</option>
-                                        <option value="MNB">MNB</option>
+                                    className="border rounded border-gray-300 px-2 py-2 text-black"
+                                    value={oldAsset}
+                                    onChange={(e) => setOldAsset(e.target.value)}>
+                                    {assets.addressArray.map((address, index) => (
+                                        <option key={address} value={address}>
+                                            {assets.nameArray[index]}
+                                        </option>
+                                    ))}   
                                     </select>
-                                    {/* chain tokens */}
                                     <select
-                                    className="border rounded border-gray-300 px-2 py-2 text-black">
-                                        <option value="Celo">Celo</option>
-                                        <option value="BSC">BSC</option>
-                                        <option value="MNB">MNB</option>
+                                    className="border rounded border-gray-300 px-2 py-2 text-black"
+                                    value={newAsset}
+                                    onChange={(e) => setNewAsset(e.target.value)}>
+                                    {newAssets.map((asset, index) => (
+                                        <option key={index} value={chainId === sepolia.id ? asset.sepoliaAddress : chainId === arbitrumSepolia.id ? asset.arbitrumAddress : ''}>
+                                            {asset.name}
+                                        </option>
+                                    ))}
                                     </select>
                                     <button className="bg-gradient2 text-white py-2 px-4 rounded border-2 border-white cursor-pointer"
-                                    // onClick={handlereplaceClick}
+                                    onClick={handleReplaceClick}
                                     >
                                         Replace
                                     </button>

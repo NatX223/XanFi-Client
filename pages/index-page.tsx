@@ -29,7 +29,7 @@ const Subscriptions: NextPage = () => {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree&display=swap" rel="stylesheet" />
       </Head>
-      {index && <IndexDetails name={index.name} description={index.description} sector={index.sector} creator={index.creator} chain={index.chain} holders={index.holders} assets={index.assets} docId={idString}/>}
+      {index && <IndexDetails name={index.name} description={index.description} sector={index.sector} creator={index.creator} chain={index.chain} chainId={index.chainId} holders={index.holders} assets={index.assets} docId={idString}/>}
     </>
   );
 };
