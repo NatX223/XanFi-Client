@@ -33,40 +33,6 @@ export const Header = () => {
     useCallback(() => setIsDrawerOpen(false), []),
   );
 
-  // const mcUSDC = buildTokenMapping([
-  //   deployment(optimism.id, "0x<USDC-ON-OPTIMISM-ADDRESS>"),
-  //   deployment(base.id, "0x<USDC-ON-OPTIMISM-ADDRESS>"),
-  // ]);
-
-  // const intersectTokenAndClients = (
-  //   token: MultichainTokenMapping,
-  //   mcClient: MultichainClient
-  // ) => {
-  //   return token.filter((deployment) =>
-  //     mcClient.chainsRpcInfo
-  //       .map((info) => info.chainId)
-  //       .includes(deployment.chainId)
-  //   );
-  // };
-   
-  // // Store the intersection of the Klaster provided token and the chains your project is using.
-  // const mUSDC = intersectTokenAndClients(mcUSDC, mcClient);
-
-  // const uBalance = await mcClient.getUnifiedErc20Balance({
-  //   tokenMapping: mUSDC,
-  //   account: klaster.account,
-  // });
-   
-  // // Total balance across all used chains, expressed in base units
-  // uBalance.balance;
-   
-  // // Breakdown of balances across each separate blockchain
-  // uBalance.breakdown;
-   
-  // // The decimals of the token. In order for tokenMapping to be created,
-  // // all instances must have the same number of decimals.
-  // uBalance.decimals;
-
   const navLinks = (
     <>
       <li>

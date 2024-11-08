@@ -4,35 +4,17 @@ import { useAccount, useDisconnect, useSwitchChain } from "wagmi";
 import { ArrowLeftOnRectangleIcon, ArrowsRightLeftIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 // import { getUser, saveUser } from "~~/firebase/firestore";
-import { useAutoConnect, useNetworkColor } from "~~/hooks/scaffold-eth";
-import {
-  mainnet,
-  polygon,
-  optimism,
-  arbitrum,
-  base,
-} from 'wagmi/chains';
+import { useNetworkColor } from "~~/hooks/scaffold-eth";
 
 /**
  * Custom Wagmi Connect Button (watch balance + custom design)
  */
 export const RainbowKitCustomConnectButton = () => {
-  useAutoConnect();
 
   const networkColor = useNetworkColor();
   const { disconnect } = useDisconnect();
   const { switchChain } = useSwitchChain();
   const { address, isConnected } = useAccount();
-  const chains = [mainnet, polygon, optimism, arbitrum, base];
-
-  // useEffect(() => {
-  //   (async () => {
-  //     const user = await getUser(address);
-  //     if (user == null) {
-  //       saveUser(address);
-  //     }
-  //   })();
-  // }, [isConnected]);
 
   return (
     <ConnectButton.Custom>
@@ -51,49 +33,6 @@ export const RainbowKitCustomConnectButton = () => {
                   >
                     Connect Wallet
                   </button>
-                );
-              }
-              if (chain.unsupported) {
-                return (
-                  <div className="dropdown dropdown-end">
-                    <button tabIndex={0} className="btn btn-error btn-sm dropdown-toggle">
-                      <span>Wrong network</span>
-                      <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
-                    </button>
-                    <ul tabIndex={0} className="dropdown-content menu p-2 mt-1 shadow-lg bg-base-100 rounded-box">
-                      <li>
-                        <button
-                          className="menu-item"
-                          type="button"
-                          onClick={() => switchChain({ chainId: mainnet.id })}
-                        >
-                          <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" />
-                          <span className="whitespace-nowrap">
-                            {/* Switch to <span style={{ color: networkColor }}>{configuredNetwork.name}</span> */}
-                            Switch to <span>{mainnet.name}</span>
-                          </span>
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          className="menu-item"
-                          type="button"
-                          onClick={() => switchChain({ chainId: polygon.id })}
-                        >
-                          <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" />
-                          <span className="whitespace-nowrap">
-                            {/* Switch to <span style={{ color: networkColor }}>{configuredNetwork.name}</span> */}
-                            Switch to <span>{polygon.name}</span>
-                          </span>
-                        </button>
-                      </li>
-                      <li>
-                        <button className="menu-item text-error" type="button" onClick={() => disconnect()}>
-                          <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Disconnect</span>
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
                 );
               }
 

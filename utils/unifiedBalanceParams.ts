@@ -10,6 +10,7 @@ export const mcClient = buildMultichainReadonlyClient([
 export const mcUSDC = buildTokenMapping([
     deployment(sepolia.id, USDCAddresses[sepolia.id] as `0x${string}`),
     deployment(arbitrumSepolia.id, USDCAddresses[arbitrumSepolia.id] as `0x${string}`),
+    
 ]);
 
 export const mcLINK = buildTokenMapping([

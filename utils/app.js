@@ -1,25 +1,27 @@
 import { db } from "./Firebase/firebaseConfig";
 const { ethers } = require("ethers");
-import { collection, addDoc, doc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { factoryAbi } from "./Artifacts/FactoryABI";
 import { indexAbi } from "./Artifacts/IndexABI";
 import { factoryAddresses, USDCAddresses } from "./Artifacts/Addresses";
 import { providers } from "./Artifacts/providers";
 import { encodeFunctionData } from "viem";
 import { acrossBridgePlugin } from "./acrossBridgePlugin";
-mcClient
+
 import {
   buildItx,
   buildMultichainReadonlyClient,
   buildRpcInfo,
   initKlaster,
+  encodeApproveTx,
+  encodeBridgingOps,
   klasterNodeHost,
   loadBicoV2Account,
   rawTx,
   singleTx,
   batchTx
 } from "klaster-sdk";
-import { arbitrumSepolia, sepolia } from "viem/chains";
+import { arbitrumSepolia, sepolia, baseSepolia } from "viem/chains";
 import { mcClient, mUSDC } from "./unifiedBalanceParams";
 
 export const createIndex = async(name, description, sector, assets, chain, indexFee, signer) => {
@@ -82,10 +84,10 @@ export const createIndex = async(name, description, sector, assets, chain, index
         const _result = await klaster.execute(quote, signed);
         console.log(_result.itxHash);
 
-        const indeciesCollection = collection(db, 'Indecies');
-
-        const snapshot = await getDocs(indeciesCollection);
-        const docCount = snapshot.size;
+        const counterId = chain.id === 421_614 ? "arbitrum" : "sepolia";
+        const counterDocRef = doc(db, 'counter', counterId);
+        const docSnap = await getDoc(counterDocRef);
+        const counter = docSnap.data().counter;    
 
         // call function to deploy on another chain here
         const docRef = await addDoc(collection(db, 'Indecies'), {
@@ -97,8 +99,13 @@ export const createIndex = async(name, description, sector, assets, chain, index
           chain: chain.name,
           chainId: chain.id,
           creator: signer.address,
-          id: docCount
+          id: counter
         });
+
+        await updateDoc(counterDocRef, {
+          counter: counter + 1
+        });
+
         console.log('Index recorded', docRef.id);
         return true;
     } catch (error) {
@@ -124,13 +131,13 @@ export const InvestFund = async(amount, docId, chain, signer) => {
         if (docSnap.exists()) {
           const indexId = docSnap.data().id;
           const chainId = docSnap.data().chainId;
-          const provider = providers[chain];
+          const provider = providers[chainId];
 
           const recipient = klaster.account.getAddress(chainId);
 
-          const factoryAddress = factoryAddresses[chain]; 
+          const factoryAddress = factoryAddresses[chainId]; 
           const factoryContract = new ethers.Contract(factoryAddress, factoryAbi, provider);
-          const indexAddress = await factoryContract.indicies(indexId);
+          const indexAddress = await factoryContract.indicies(0);
 
           const purchaseAmount = amount * (10 ** uBalance.decimals);
 
@@ -146,7 +153,7 @@ export const InvestFund = async(amount, docId, chain, signer) => {
               amount: bridgeAmount,
               bridgePlugin: acrossBridgePlugin,
               client: mcClient,
-              destinationChainId: base.id,
+              destinationChainId: chainId,
               unifiedBalance: uBalance,
             });
 
@@ -211,10 +218,8 @@ export const InvestFund = async(amount, docId, chain, signer) => {
               }),
             });
 
-            const investTx = batchTx(chainId, sendERC20Op, approveOp, investOp)
-
             const iTx = buildItx({
-              steps: [investTx],
+              steps: [singleTx(chainId, approveOp), singleTx(chainId, investOp)],
               feeTx: klaster.encodePaymentFee(arbitrumSepolia.id, "USDC"),
             });
 

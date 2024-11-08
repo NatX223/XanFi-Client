@@ -1,6 +1,7 @@
 import { Pie, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, LineElement,PointElement, LinearScale, Title, CategoryScale } from 'chart.js';
 import React, { useEffect, useState } from 'react';
+import { subDays, format } from 'date-fns';
 
 ChartJS.register(ArcElement, Tooltip, Legend, LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale);
 
@@ -110,14 +111,14 @@ export const AssetsChart = ({ ratio, assets }: { ratio: number[], assets: string
 
     const options = {
         plugins: {
-            legend: {
-                position: 'left', // Position the legend to the left
-                labels: {
-                    boxWidth: 50, // Adjust the size of the legend boxes
-                },
+          legend: {
+            position: 'left' as const,
+            labels: {
+              boxWidth: 50,
             },
+          },
         },
-        maintainAspectRatio: false, // Allow custom size
+        maintainAspectRatio: false,
     };
 
     return (
@@ -127,19 +128,40 @@ export const AssetsChart = ({ ratio, assets }: { ratio: number[], assets: string
     );
 };
 
-export const PerformanceChart = ({ ratios, symbols }: { ratios: number[], symbols: string[] }) => {
+export const PerformanceChart = () => {
     const [chartData, setChartData] = useState<{ labels: string[], datasets: any[] } | null>(null);
 
     useEffect(() => {
         const fetchAndCalculatePerformance = async () => {
-            const rates = await fetchLast7DaysData();
-            const performanceData = calculatePerformance(rates, ["BTC", "ETH"], [50, 50]);
-            const data = formatChartData(performanceData);
+            const dates = Array.from({ length: 7 }, (_, i) => 
+                format(subDays(new Date(), i), 'MM/dd')
+            ).reverse();
+    
+            // Generate random performance data for each of the past 7 days
+            const performanceData = Array.from({ length: 7 }, () => 
+                Math.floor(Math.random() * 20) + 1 // Random number between 1 and 20
+            );
+    
+            const data = {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Performance',
+                        data: performanceData,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                    },
+                ],
+            };
+    
             setChartData(data);
         };
-
+    
         fetchAndCalculatePerformance();
     }, []);
+    
 
     const options = {
         scales: {
@@ -152,7 +174,7 @@ export const PerformanceChart = ({ ratios, symbols }: { ratios: number[], symbol
         },
         plugins: {
             legend: {
-                position: 'top',
+                position: 'top' as const, // Use 'as const' to ensure it's interpreted as a literal type
             },
             title: {
                 display: true,

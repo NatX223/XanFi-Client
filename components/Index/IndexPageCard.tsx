@@ -77,7 +77,6 @@ export function IndexDetails({ name, description, sector, creator, chain, chainI
         }
     };
 
-
     const handleInvestClick = async () => {
         const success = await InvestFund(investAmount, docId, chainId, signer);
         if (success) {
@@ -130,8 +129,6 @@ export function IndexDetails({ name, description, sector, creator, chain, chainI
                         <h3> Category: {sector} </h3>
                         <h3> Created By: {creator} </h3>
                         <h3> Chain: {chain} </h3>
-                        <h3> Holders: {holders} </h3>
-                        {/* <h3> price: ... </h3> */}
                     </div>
             </div>
         </div>
@@ -143,14 +140,14 @@ export function IndexDetails({ name, description, sector, creator, chain, chainI
                         <AssetsChart ratio={assets.ratioArray} assets={assets.nameArray}/>
             </div>
         </div>
-        {/* <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
+        <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
             <div className='card-body px-12 py-8'>
                         <div>
                             <h1 className="text-2xl font-semibold"> Performance </h1>
                         </div>
-                        <PerformanceChart ratios={assets.ratioArray} symbols={assets.nameArray}/>
+                        <PerformanceChart/>
             </div>
-        </div> */}
+        </div>
         <div className="index-page-card lg:card-side border-[2px] border-[#ff00b8] ml-12 mr-12 rounded-2xl bg-gradient-2-0">
             <div className='card-body px-12 py-8'>
                     <div className='relative grid grid-rows-2 gap-2'>
@@ -187,7 +184,7 @@ export function IndexDetails({ name, description, sector, creator, chain, chainI
                             <div>
                                 <div className="relative grid grid-cols-3 gap-2">
                                     <input className="border border-bg-gradient rounded p-1 bg-gray-400 text-white" type="string" 
-                                    value={investAmount}
+                                    value={redeemAmount}
                                     onChange={handleRedeemAmountChange}/>
                                     {/* <select
                                     className="border rounded border-gray-300 px-2 py-2 text-black">
@@ -245,6 +242,6 @@ export function IndexDetails({ name, description, sector, creator, chain, chainI
             </div>
         </div>
         <ToastContainer />
-        </div>
+    </div>
   );
 }
